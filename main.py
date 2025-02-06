@@ -19,18 +19,44 @@ telegram_channel = "@BWEnews"
 client = TelegramClient("session_name", api_id, api_hash)
 
 # 發送訊息到 LINE Notify
-def send_message_to_line_channel(channel_access_token, user_id, message):
-    url = "https://api.line.me/v2/bot/message/push"
+# def send_message_to_line_channel(channel_access_token, user_id, message):
+#     url = "https://api.line.me/v2/bot/message/push"
+    
+#     headers = {
+#         "Content-Type": "application/json",
+#         "Authorization": f"Bearer {channel_access_token}"
+#     }
+    
+#     # Prepare the payload for sending the message
+#     print(user_id)
+#     payload = {
+#         "to": user_id,  # The user ID to send the message to
+#         "messages": [
+#             {
+#                 "type": "text",
+#                 "text": message
+#             }
+#         ]
+#     }
+    
+#     # Send POST request to Line API
+#     response = requests.post(url, headers=headers, data=json.dumps(payload))
+    
+#     # Check the response
+#     print(f"Status Code: {response.status_code}")
+#     print(f"Response: {response.text}")
+
+import json
+def send_broadcast_message(channel_access_token, message):
+    url = "https://api.line.me/v2/bot/message/broadcast"
     
     headers = {
         "Content-Type": "application/json",
         "Authorization": f"Bearer {channel_access_token}"
     }
     
-    # Prepare the payload for sending the message
-    print(user_id)
+    # 設置發送的訊息
     payload = {
-        "to": user_id,  # The user ID to send the message to
         "messages": [
             {
                 "type": "text",
@@ -39,19 +65,20 @@ def send_message_to_line_channel(channel_access_token, user_id, message):
         ]
     }
     
-    # Send POST request to Line API
+    # 發送請求到 LINE API
     response = requests.post(url, headers=headers, data=json.dumps(payload))
     
-    # Check the response
+    # 顯示回應結果
     print(f"Status Code: {response.status_code}")
     print(f"Response: {response.text}")
+
 
 # 當有新訊息時觸發
 @client.on(events.NewMessage(chats=telegram_channel))
 async def handler(event):
     message = event.message.message  # 取得訊息內容
     print(f"📩 收到新訊息：\n {message}")
-    send_message_to_line_channel(channel_access_token, user_id, f"Telegram 頻道新訊息：{message}")
+    send_broadcast_message(channel_access_token, f"Telegram 頻道新訊息：{message}")
     
 import asyncio
 async def main():
