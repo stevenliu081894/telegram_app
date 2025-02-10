@@ -1,52 +1,40 @@
 from telethon import TelegramClient, events
 import requests
 import json
+import tweepy
+from datetime import datetime
 
 # 🔹 你的 Telegram API ID & Hash（從 my.telegram.org 獲取）
 api_id = "21126131"
 api_hash = "ecf27e18d7e360b0ae698bc99a92d9fe"
-
-# 🔹 你的 Telegram 電話號碼（用來登入）
-phone_number = "+886930704917"
-
-channel_access_token = "W1IoWOAaemIvU/goJfrBpYI+5hqifav/tpVlSWcCR6BpGrC7jJfXsQRiDf3r2CB0l+EG4jXHsY91wCW+MMU/kJAzc+yPY2KO56aoyfcG+m6GOqY6k/DaciEe2tS+h14rO9c0F+2ha/QJ0smo3o3haQdB04t89/1O/w1cDnyilFU="  # Replace with your Channel Access Token
-user_id = "U41a8702d9d4455adec6737ca0782f805"  # The user or group ID you want to send the message to
-
 # 🔹 監聽的 Telegram 頻道用戶名（例如 @yourchannel）
-telegram_channel = "@BWEnews"
+bwe_telegram_channel = "@BWEnews"
+bithumb_telegram_channel = "@BithumbExchange"
+
+twitter_bear_token = "AAAAAAAAAAAAAAAAAAAAAFVCywEAAAAAtp%2F%2B8o0ymg1MY7T0ewdqxcHIX20%3DiVLMk5y1v6mNb8gUcTF3ZsxVbExCZQlbI3sPN8fBZzwp9wwf0e"      # Twitter API Bearer Token
+twitter_target_username = "bwenews" # 目標 Twitter 帳號（例如：elonmusk，不含 @）
+
 
 # 初始化 Telegram 客戶端
 client = TelegramClient("session_name", api_id, api_hash)
+# 🔹 你的 Telegram 電話號碼（用來登入）
+phone_number = "+886930704917"
 
-# 發送訊息到 LINE Notify
-# def send_message_to_line_channel(channel_access_token, user_id, message):
-#     url = "https://api.line.me/v2/bot/message/push"
-    
-#     headers = {
-#         "Content-Type": "application/json",
-#         "Authorization": f"Bearer {channel_access_token}"
-#     }
-    
-#     # Prepare the payload for sending the message
-#     print(user_id)
-#     payload = {
-#         "to": user_id,  # The user ID to send the message to
-#         "messages": [
-#             {
-#                 "type": "text",
-#                 "text": message
-#             }
-#         ]
-#     }
-    
-#     # Send POST request to Line API
-#     response = requests.post(url, headers=headers, data=json.dumps(payload))
-    
-#     # Check the response
-#     print(f"Status Code: {response.status_code}")
-#     print(f"Response: {response.text}")
+
+
+# for line 官方帳號
+channel_access_token = "W1IoWOAaemIvU/goJfrBpYI+5hqifav/tpVlSWcCR6BpGrC7jJfXsQRiDf3r2CB0l+EG4jXHsY91wCW+MMU/kJAzc+yPY2KO56aoyfcG+m6GOqY6k/DaciEe2tS+h14rO9c0F+2ha/QJ0smo3o3haQdB04t89/1O/w1cDnyilFU="  # Replace with your Channel Access Token
+notify_group_token = "JyBbcigUcucMOgPud1qwmyIkDd5orgtN0SsZkm9Kdvd"
+
 
 import json
+
+def send_message_to_notify(message):
+    headers = {"Authorization": f"Bearer {notify_group_token}"}
+    data = {"message": message}
+    requests.post("https://notify-api.line.me/api/notify", headers=headers, data=data)
+
+
 def send_broadcast_message(channel_access_token, message):
     url = "https://api.line.me/v2/bot/message/broadcast"
     
@@ -74,12 +62,50 @@ def send_broadcast_message(channel_access_token, message):
 
 
 # 當有新訊息時觸發
-@client.on(events.NewMessage(chats=telegram_channel))
+@client.on(events.NewMessage(chats=bwe_telegram_channel))
 async def handler(event):
+    print(f"from bwe..{datetime.now()}", flush=False)
     message = event.message.message  # 取得訊息內容
-    print(f"📩 收到新訊息：\n {message}")
+    send_message_to_notify(message)
     send_broadcast_message(channel_access_token, f"Telegram 頻道新訊息：{message}")
     
+@client.on(events.NewMessage(chats=bithumb_telegram_channel))
+async def handler(event):
+    print(f"from bithumb..{datetime.now()}", flush=False)
+    pre_message = event.message.message  # 取得訊息內容
+    message = f"From bithumb:\n {pre_message}"
+    send_message_to_notify(message)
+    
+
+# def twitter_process():
+#     # 建立 Client 取得目標使用者資訊，並取得其 user id
+#     client = tweepy.Client(bearer_token=twitter_bear_token)
+#     user_response = client.get_user(username=twitter_target_username)
+#     if user_response.data is None:
+#         print("找不到用戶:", twitter_target_username)
+#         return
+#     target_user_id = str(user_response.data.id)
+#     print(f"目標用戶 {twitter_target_username} 的 user id：{target_user_id}")
+
+#     # 初始化 Streaming Client
+#     stream = MyTweetStream(bearer_token=twitter_bear_token, target_user_id=target_user_id)
+    
+#     # 清除現有規則（若有的話）
+#     current_rules = stream.get_rules().data
+#     if current_rules is not None:
+#         rule_ids = [rule.id for rule in current_rules]
+#         stream.delete_rules(rule_ids)
+    
+#     # 新增規則：監控來自 TARGET_USERNAME 的貼文
+#     # 這裡的規則使用 "from:帳號名稱" 進行過濾
+#     rule_value = f"from:{twitter_target_username}"
+#     stream.add_rules(tweepy.StreamRule(value=rule_value, tag="target_user_rule"))
+#     print(f"已新增監聽規則：{rule_value}")
+    
+#     # 開始過濾資料流，並要求附帶作者資訊
+#     print("開始監聽貼文，等待新貼文中...")
+#     stream.filter(tweet_fields=["author_id", "created_at"])
+
 import asyncio
 async def main():
     await client.start(phone_number)
