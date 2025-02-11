@@ -64,16 +64,15 @@ def send_broadcast_message(channel_access_token, message):
 # 當有新訊息時觸發
 @client.on(events.NewMessage(chats=bwe_telegram_channel))
 async def handler(event):
-    print(f"from bwe..{datetime.now()}", flush=False)
-    message = event.message.message  # 取得訊息內容
+    pre_message = event.message.message  # 取得訊息內容
+    message = f"From bwe: \n {datetime.now()} \n {pre_message}"
     send_message_to_notify(message)
-    send_broadcast_message(channel_access_token, f"Telegram 頻道新訊息：{message}")
+    send_broadcast_message(channel_access_token, message)
     
 @client.on(events.NewMessage(chats=bithumb_telegram_channel))
 async def handler(event):
-    print(f"from bithumb..{datetime.now()}", flush=False)
     pre_message = event.message.message  # 取得訊息內容
-    message = f"From bithumb:\n {pre_message}"
+    message = f"From bithumb: \n {datetime.now()} \n {pre_message}"
     send_message_to_notify(message)
     
 
