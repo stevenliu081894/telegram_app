@@ -293,8 +293,8 @@ def parse(html_content, key_word):
                 previos_coin = coin_name
             else:
                 print("Coin Name not found.")
-        # else:
-        #     print("The first item is not '마켓 추가'.")
+        else:
+            print("The first item is not '마켓 추가'.")
         
         # Measure time elapsed
     # time_elapse = time.time() - past_time
@@ -338,7 +338,7 @@ def main():
         for proxy in proxies:
             try:
                 # Make the request using the current proxy
-                response = scraper.get(URL, headers=headers, proxies=proxy)
+                response = scraper.get(URL, headers=headers)
 
                 # Print the status code and latency for each request
                 # print(f"Status Code: {response.status_code}")
@@ -358,6 +358,8 @@ def main():
 
             # Wait for the next request (1 second) before continuing to the next proxy
             time.sleep(interval)
+            break
+        break
 
 if __name__ == "__main__":
     print("test")
