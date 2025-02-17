@@ -338,7 +338,7 @@ def main():
         for proxy in proxies:
             try:
                 # Make the request using the current proxy
-                response = scraper.get(URL, headers=headers, proxy = proxy)
+                response = scraper.get(URL, headers=headers, proxies = proxy)
 
                 # Print the status code and latency for each request
                 # print(f"Status Code: {response.status_code}")
