@@ -41,13 +41,20 @@ cookie_dict = {cookie['name']: cookie['value'] for cookie in cookies}
 
 # Now use cloudscraper with the extracted cookies
 
+ # Set up headers to mimic a real browser
+headers = {
+    "User-Agent": "Mozilla/5.0",
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8",
+    "Accept-Language": "en-US,en;q=0.9",
+    "Connection": "keep-alive",
+}
 scraper = cloudscraper.create_scraper()
 
 # Set the cookies
 scraper.cookies.update(cookie_dict)
 
 # Make the request using the cookies
-response = scraper.get(URL)
+response = scraper.get(URL, headers=headers)
 
 # Output the response text
 print(response.text)
