@@ -348,7 +348,7 @@ def main():
                     html_content = response.text
                     parse(html_content, key_word="마켓 추가")
                 else:
-                    print("Request failed.")
+                    print(response)
                 # print(f"Latency: {time.time() - past_time:.3f} seconds")
                 past_time = time.time()
             except Exception as e:
